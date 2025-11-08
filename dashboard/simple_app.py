@@ -20,7 +20,7 @@ os.chdir(project_root)  # Change to project root so models can be found
 load_dotenv(os.path.join(project_root, '.env'))
 
 from mongodb_manager import PhishGuardMongoDB
-from enhanced_mongodb_detector import EnhancedPhishingDetector
+from enhanced_fixed_detector import EnhancedFixedDetector
 from datetime import datetime, timedelta
 import json
 import time
@@ -41,7 +41,7 @@ def initialize_components():
     try:
         mongo_db = PhishGuardMongoDB()
         # Initialize the enhanced detector with proper subdomain and URL handling
-        detector = EnhancedPhishingDetector(use_mongodb=True)
+        detector = EnhancedFixedDetector(use_mongodb=True)
         print("✅ Dashboard components initialized successfully")
     except Exception as e:
         print(f"❌ Failed to initialize components: {e}")
