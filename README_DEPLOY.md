@@ -6,6 +6,8 @@
 
 PhishGuard AI is an advanced machine learning-powered phishing detection system specifically designed for **Indian Critical Sector Entities (CSEs)**. It provides real-time threat detection with comprehensive analytics through a modern web dashboard.
 
+**🏆 Dataset Attribution**: This model has been trained from a dataset taken from **NCIIP Startup India AI GRAND CHALLENGE's Problem Statement data**, ensuring high-quality training data specifically focused on Indian cybersecurity threats.
+
 ## ✨ Key Features
 
 ### 🔍 **AI-Powered Detection**

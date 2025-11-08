@@ -1,6 +1,9 @@
 """
 Enhanced PhishGuard Detector with MongoDB Integration
 Extends the optimized detector with database storage and analytics.
+
+Dataset Attribution: This model has been trained from a dataset taken from 
+NCIIP Startup India AI GRAND CHALLENGE's Problem Statement data.
 """
 
 from optimized_detector import OptimizedPhishGuardDetector

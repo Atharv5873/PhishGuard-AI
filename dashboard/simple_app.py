@@ -1,6 +1,9 @@
 """
 PhishGuard AI Simple Dashboard
 Beautiful web interface without WebSocket (for compatibility).
+
+Dataset Attribution: This model has been trained from a dataset taken from 
+NCIIP Startup India AI GRAND CHALLENGE's Problem Statement data.
 """
 
 from flask import Flask, render_template, jsonify, request
