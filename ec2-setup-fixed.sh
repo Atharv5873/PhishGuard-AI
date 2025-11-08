@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# PhishGuard AI - AWS EC2 Setup Script
+# PhishGuard AI - Simple EC2 Setup Script (Fixed Docker Permissions)
 # This script installs Docker, clones the repository, and deploys the application
 
 set -e  # Exit on any error
 
-echo "🚀 PhishGuard AI - AWS EC2 Deployment Script"
-echo "============================================"
+echo "🚀 PhishGuard AI - AWS EC2 Deployment Script (v2)"
+echo "================================================="
 
 # Update system packages
 echo "📦 Updating system packages..."
@@ -51,8 +51,14 @@ sudo systemctl enable docker
 # Clone PhishGuard AI repository
 echo "📥 Cloning PhishGuard AI repository..."
 cd /home/ubuntu
-git clone https://github.com/Atharv5873/PhishGuard-AI.git
-cd PhishGuard-AI
+if [ -d "PhishGuard-AI" ]; then
+    echo "Repository already exists, updating..."
+    cd PhishGuard-AI
+    git pull origin main
+else
+    git clone https://github.com/Atharv5873/PhishGuard-AI.git
+    cd PhishGuard-AI
+fi
 
 # Create environment file
 echo "⚙️ Creating environment configuration..."
@@ -70,7 +76,7 @@ FLASK_DEBUG=False
 EOF
 
 echo "📝 IMPORTANT: Edit .env file with your MongoDB Atlas credentials!"
-echo "   sudo nano /home/ubuntu/PhishGuard-AI/.env"
+echo "   nano .env"
 
 # Create logs directory
 mkdir -p logs
@@ -78,8 +84,6 @@ mkdir -p logs
 # Test Docker installation (using sudo since group membership not active yet)
 echo "🧪 Testing Docker installation..."
 sudo docker run hello-world
-
-# Note: Docker buildx setup will be done in deploy.sh after group membership is active
 
 # Create systemd service for auto-start
 echo "🔄 Creating systemd service..."
@@ -96,6 +100,8 @@ WorkingDirectory=/home/ubuntu/PhishGuard-AI
 ExecStart=/usr/local/bin/docker-compose up -d
 ExecStop=/usr/local/bin/docker-compose down
 TimeoutStartSec=0
+User=ubuntu
+Group=ubuntu
 
 [Install]
 WantedBy=multi-user.target
@@ -113,31 +119,45 @@ sudo ufw allow 80
 sudo ufw allow 443
 sudo ufw allow 8080
 
-# Create deployment script
+# Create simple deployment script (no buildx required)
 echo "📝 Creating deployment script..."
 cat > deploy.sh << 'EOF'
 #!/bin/bash
 echo "🚀 Deploying PhishGuard AI..."
 
-# Setup Docker buildx if not already done (now that docker group membership is active)
-if ! docker buildx version >/dev/null 2>&1; then
-    echo "🔧 Setting up Docker buildx..."
-    docker buildx install
-    docker buildx create --use --name phishguard-builder 2>/dev/null || echo "Builder already exists"
-    docker buildx use phishguard-builder
+# Ensure we have docker group permissions
+if ! docker ps >/dev/null 2>&1; then
+    echo "⚠️  Docker permission issue. Running with sudo..."
+    DOCKER_CMD="sudo docker-compose"
+else
+    DOCKER_CMD="docker-compose"
 fi
 
 # Pull latest changes
+echo "📥 Pulling latest code..."
 git pull origin main
 
-# Build and start services
-docker-compose down
-docker-compose build --no-cache
-docker-compose up -d
+# Stop existing containers
+echo "🛑 Stopping existing containers..."
+$DOCKER_CMD down
 
+# Build new images
+echo "🔨 Building new images..."
+$DOCKER_CMD build --no-cache
+
+# Start services
+echo "🚀 Starting services..."
+$DOCKER_CMD up -d
+
+echo ""
 echo "✅ PhishGuard AI deployed successfully!"
 echo "🌐 Access dashboard at: http://$(curl -s http://checkip.amazonaws.com):8080"
 echo "📊 Health check: http://$(curl -s http://checkip.amazonaws.com):8080/health"
+echo ""
+
+# Show container status
+echo "📦 Container Status:"
+$DOCKER_CMD ps
 EOF
 
 chmod +x deploy.sh
@@ -149,17 +169,34 @@ cat > monitor.sh << 'EOF'
 echo "📊 PhishGuard AI System Status"
 echo "============================="
 
+# Check if we can run docker without sudo
+if docker ps >/dev/null 2>&1; then
+    DOCKER_CMD="docker-compose"
+else
+    DOCKER_CMD="sudo docker-compose"
+fi
+
 echo "🐳 Docker Status:"
 sudo systemctl status docker --no-pager -l
 
 echo -e "\n📦 Container Status:"
-docker-compose ps
+$DOCKER_CMD ps
 
 echo -e "\n📈 Resource Usage:"
-docker stats --no-stream
+if docker ps >/dev/null 2>&1; then
+    docker stats --no-stream
+else
+    echo "   (Run with docker permissions for detailed stats)"
+fi
 
 echo -e "\n🔍 Recent Logs (last 20 lines):"
-docker-compose logs --tail=20
+$DOCKER_CMD logs --tail=20 phishguard-ai 2>/dev/null || echo "   Container logs not available"
+
+echo -e "\n💾 Disk Usage:"
+df -h /
+
+echo -e "\n🧠 Memory Usage:"
+free -h
 
 echo -e "\n🌐 Public IP:"
 curl -s http://checkip.amazonaws.com
@@ -171,14 +208,36 @@ EOF
 
 chmod +x monitor.sh
 
+# Create quick fix script for Docker permissions
+echo "🔧 Creating Docker permission fix script..."
+cat > fix-docker-permissions.sh << 'EOF'
+#!/bin/bash
+echo "🔧 Fixing Docker permissions..."
+
+# Re-add user to docker group
+sudo usermod -aG docker $USER
+
+# Restart Docker service
+sudo systemctl restart docker
+
+# Apply group membership immediately
+newgrp docker
+
+echo "✅ Docker permissions fixed!"
+echo "   You can now run: ./deploy.sh"
+EOF
+
+chmod +x fix-docker-permissions.sh
+
 echo ""
 echo "✅ Setup completed successfully!"
 echo ""
 echo "🎯 Next Steps:"
-echo "1. Edit environment file: sudo nano .env"
+echo "1. Edit environment file: nano .env"
 echo "2. Add your MongoDB Atlas credentials"
-echo "3. Deploy: ./deploy.sh"
-echo "4. Monitor: ./monitor.sh"
+echo "3. Fix Docker permissions: ./fix-docker-permissions.sh"
+echo "4. Deploy: ./deploy.sh"
+echo "5. Monitor: ./monitor.sh"
 echo ""
 echo "🌐 Your EC2 public IP: $(curl -s http://checkip.amazonaws.com)"
 echo "📊 Dashboard will be available at: http://$(curl -s http://checkip.amazonaws.com):8080"
@@ -188,7 +247,7 @@ echo "   - Update .env with real MongoDB credentials"
 echo "   - Check security group allows port 8080"
 echo "   - Save your EC2 key pair securely"
 
-# Log out and back in to apply docker group membership
 echo ""
-echo "🔄 Please run: newgrp docker (or logout and login again)"
-echo "   Then run: ./deploy.sh"
+echo "🔄 Docker Group Fix Required:"
+echo "   Run: ./fix-docker-permissions.sh"
+echo "   Then: ./deploy.sh"
