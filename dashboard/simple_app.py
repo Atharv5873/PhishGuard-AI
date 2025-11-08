@@ -365,6 +365,48 @@ def detect_phishing():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/health')
+def health_check():
+    """Health check endpoint for Docker and load balancers."""
+    try:
+        # Basic health checks
+        health_status = {
+            'status': 'healthy',
+            'timestamp': datetime.utcnow().isoformat() + 'Z',
+            'version': '1.0.0',
+            'components': {}
+        }
+        
+        # Check MongoDB connection
+        if mongo_db:
+            try:
+                # Simple ping test
+                mongo_db.client.admin.command('ping')
+                health_status['components']['mongodb'] = 'healthy'
+            except:
+                health_status['components']['mongodb'] = 'unhealthy'
+                health_status['status'] = 'degraded'
+        else:
+            health_status['components']['mongodb'] = 'not_configured'
+        
+        # Check detector availability
+        if detector:
+            health_status['components']['ml_detector'] = 'healthy'
+        else:
+            health_status['components']['ml_detector'] = 'unhealthy'
+            health_status['status'] = 'degraded'
+        
+        # Return appropriate status code
+        status_code = 200 if health_status['status'] == 'healthy' else 503
+        return jsonify(health_status), status_code
+        
+    except Exception as e:
+        return jsonify({
+            'status': 'unhealthy',
+            'error': str(e),
+            'timestamp': datetime.utcnow().isoformat() + 'Z'
+        }), 500
+
 if __name__ == '__main__':
     print("🚀 Initializing PhishGuard AI Simple Dashboard...")
     
