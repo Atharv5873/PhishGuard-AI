@@ -17,28 +17,35 @@ git pull origin main
 echo "🔍 Verifying critical dependencies..."
 if grep -q "tldextract\|fuzzywuzzy\|python-Levenshtein\|validators" requirements_deploy.txt; then
     echo "✅ All critical dependencies found in requirements"
+    echo "📋 Found dependencies:"
+    grep -E "tldextract|fuzzywuzzy|python-Levenshtein|validators" requirements_deploy.txt
 else
     echo "❌ Missing critical dependencies - please check requirements_deploy.txt"
     echo "Required: tldextract, fuzzywuzzy, python-Levenshtein, validators"
+    echo "Current requirements file content:"
+    cat requirements_deploy.txt
+    exit 1
 fi
 
 # Clean up failed containers and images
 echo "🧹 Cleaning up failed Docker build..."
 sudo docker-compose down
-sudo docker system prune -f
+sudo docker system prune -af
 
-# Remove problematic images
-echo "🗑️ Removing old images..."
-sudo docker rmi $(sudo docker images -q --filter "dangling=true") 2>/dev/null || echo "No dangling images to remove"
-
-# Force remove the phishguard image to rebuild completely
-echo "🔄 Removing existing PhishGuard images for clean rebuild..."
+# Remove ALL PhishGuard related images (force fresh rebuild)
+echo "🗑️ Removing ALL PhishGuard images for completely fresh build..."
+sudo docker images | grep -E "(phishguard|none)" | awk '{print $3}' | xargs -r sudo docker rmi -f
 sudo docker rmi phishguard-ai-phishguard-ai 2>/dev/null || echo "Image not found"
-sudo docker rmi $(sudo docker images | grep phishguard | awk '{print $3}') 2>/dev/null || echo "No PhishGuard images found"
+sudo docker rmi phishguard-ai_phishguard-ai 2>/dev/null || echo "Image not found"
+
+# Clear build cache completely
+echo "🧹 Clearing Docker build cache..."
+sudo docker builder prune -af
 
 # Build with no cache to force fresh download of compatible packages
-echo "🔨 Building with all fixes applied..."
-sudo docker-compose build --no-cache
+echo "🔨 Building with all fixes applied (completely fresh build)..."
+echo "   This will download all dependencies including tldextract, fuzzywuzzy, etc."
+sudo docker-compose build --no-cache --pull
 
 # Start the service
 echo "🚀 Starting PhishGuard AI..."
