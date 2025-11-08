@@ -16,6 +16,10 @@ numpy==1.24.4
 # Feature Engineering
 feature_engine==1.6.2
 beautifulsoup4==4.12.2
+tldextract==5.1.0
+fuzzywuzzy==0.18.0
+python-Levenshtein==0.21.1
+validators==0.22.0
 
 # Environment & Configuration
 python-dotenv==1.0.0
