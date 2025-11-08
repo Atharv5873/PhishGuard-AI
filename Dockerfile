@@ -7,18 +7,24 @@ WORKDIR /app
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
+ENV PIP_NO_CACHE_DIR=1
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
-COPY requirements_deploy.txt .
+# Upgrade pip first
+RUN pip install --upgrade pip
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements_deploy.txt
+# Copy requirements first for better caching
+COPY requirements_deploy.txt requirements_flexible.txt ./
+
+# Install Python dependencies with fallback
+RUN pip install --no-cache-dir -r requirements_deploy.txt || \
+    pip install --no-cache-dir -r requirements_flexible.txt
 
 # Copy application code
 COPY . .
