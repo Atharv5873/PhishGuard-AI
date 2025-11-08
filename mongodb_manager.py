@@ -22,8 +22,9 @@ class PhishGuardMongoDB:
     
     def __init__(self, connection_string: str = None):
         """Initialize MongoDB connection."""
-        # Use MongoDB Atlas URI from environment variables
-        self.connection_string = connection_string or os.getenv('MONGODB_URI', "mongodb://localhost:27017/")
+        # Use MongoDB Atlas URI from environment variables or hardcoded for production
+        default_atlas_uri = "mongodb+srv://atharv:t5b7cFAm@fastopscluster.l991pwr.mongodb.net/?appName=FastOpsCluster"
+        self.connection_string = connection_string or os.getenv('MONGODB_URI', default_atlas_uri)
         self.database_name = os.getenv('DATABASE_NAME', 'phishguard_ai')
         self.client = None
         self.db = None

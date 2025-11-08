@@ -6,7 +6,7 @@ Dataset Attribution: This model has been trained from a dataset taken from
 NCIIP Startup India AI GRAND CHALLENGE's Problem Statement data.
 """
 
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, redirect
 import sys
 import os
 from dotenv import load_dotenv
@@ -48,8 +48,8 @@ def initialize_components():
 
 @app.route('/')
 def landing():
-    """Product landing/marketing page as default."""
-    return render_template('landing.html')
+    """Redirect to dashboard since we don't have a landing template."""
+    return redirect('/dashboard')
 
 @app.route('/dashboard')
 def dashboard():
