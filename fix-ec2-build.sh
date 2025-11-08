@@ -2,6 +2,7 @@
 
 # Quick Fix for EC2 Docker Build and Import Issues
 # Run this on your EC2 instance to fix both numpy and import problems
+# UPDATED: Now includes tldextract, fuzzywuzzy, python-Levenshtein, validators dependencies
 
 echo "🔧 PhishGuard AI - Complete Docker Fix"
 echo "======================================"
@@ -11,6 +12,15 @@ cd /home/ubuntu/PhishGuard-AI || exit 1
 # Pull latest fixes from GitHub
 echo "📥 Pulling latest fixes from GitHub..."
 git pull origin main
+
+# Verify critical dependencies are present
+echo "🔍 Verifying critical dependencies..."
+if grep -q "tldextract\|fuzzywuzzy\|python-Levenshtein\|validators" requirements_deploy.txt; then
+    echo "✅ All critical dependencies found in requirements"
+else
+    echo "❌ Missing critical dependencies - please check requirements_deploy.txt"
+    echo "Required: tldextract, fuzzywuzzy, python-Levenshtein, validators"
+fi
 
 # Clean up failed containers and images
 echo "🧹 Cleaning up failed Docker build..."
