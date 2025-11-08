@@ -3,6 +3,7 @@
 # Quick Fix for EC2 Docker Build and Import Issues
 # Run this on your EC2 instance to fix both numpy and import problems
 # UPDATED: Now includes tldextract, fuzzywuzzy, python-Levenshtein, validators dependencies
+# LATEST: Fixed MongoDB connection and landing page template issues
 
 echo "🔧 PhishGuard AI - Complete Docker Fix"
 echo "======================================"
