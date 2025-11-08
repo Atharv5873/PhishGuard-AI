@@ -223,10 +223,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-For support, email [your-email@domain.com] or create an issue on GitHub.
+For support, email atharv5873@gmail.com or create an issue on GitHub.
 
 ---
 
 **⭐ If you find PhishGuard AI helpful, please give it a star on GitHub!**
-
-![PhishGuard AI Dashboard](https://via.placeholder.com/800x400/1a1a1a/00ff41?text=PhishGuard+AI+Dashboard+Demo)
