@@ -14,6 +14,29 @@ cd /home/ubuntu/PhishGuard-AI || exit 1
 echo "📥 Pulling latest fixes from GitHub..."
 git pull origin main
 
+# Setup secure environment variables
+echo "🔐 Setting up secure environment..."
+if [ ! -f .env ]; then
+    echo "⚠️  No .env file found. Setting up from template..."
+    cp .env.example .env
+    echo ""
+    echo "🚨 IMPORTANT: You need to update .env with your MongoDB credentials!"
+    echo "   Edit the MONGODB_URI with your actual connection string"
+    echo "   Command: nano .env"
+    echo ""
+    echo "   Example:"
+    echo "   MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/?appName=FastOpsCluster"
+    echo ""
+    read -p "Press Enter after updating .env file..."
+fi
+
+# Validate environment variables
+if grep -q "your-password\|your-cluster" .env; then
+    echo "❌ Environment file still contains placeholder values!"
+    echo "Please update .env with your actual MongoDB credentials."
+    exit 1
+fi
+
 # Verify critical dependencies are present
 echo "🔍 Verifying critical dependencies..."
 if grep -q "tldextract\|fuzzywuzzy\|python-Levenshtein\|validators" requirements_deploy.txt; then
