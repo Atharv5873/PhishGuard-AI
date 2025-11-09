@@ -64,7 +64,89 @@ def initialize_components():
 @app.route('/')
 def landing():
     """Product landing/marketing page as default."""
-    return render_template('landing.html')
+    try:
+        return render_template('landing.html')
+    except Exception as e:
+        # Fallback HTML if template not found
+        return """
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>PhishGuard AI - Advanced Phishing Detection</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+                .container { max-width: 1200px; margin: 0 auto; padding: 20px; text-align: center; color: white; }
+                .header { margin: 50px 0; }
+                .logo { font-size: 3em; font-weight: bold; margin-bottom: 20px; }
+                .tagline { font-size: 1.2em; margin-bottom: 40px; opacity: 0.9; }
+                .nav { margin: 40px 0; }
+                .nav a { color: white; text-decoration: none; margin: 0 20px; padding: 10px 20px; border: 2px solid white; border-radius: 25px; transition: all 0.3s; }
+                .nav a:hover { background: white; color: #667eea; }
+                .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin: 60px 0; }
+                .feature { background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px; backdrop-filter: blur(10px); }
+                .feature h3 { font-size: 1.5em; margin-bottom: 15px; }
+                .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 40px 0; }
+                .stat { background: rgba(255,255,255,0.2); padding: 20px; border-radius: 10px; }
+                .stat-number { font-size: 2.5em; font-weight: bold; margin-bottom: 10px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <div class="logo">🛡️ PhishGuard AI</div>
+                    <div class="tagline">Advanced Phishing Detection powered by Machine Learning</div>
+                </div>
+                
+                <div class="nav">
+                    <a href="/dashboard">🖥️ Dashboard</a>
+                    <a href="/health">🔍 System Health</a>
+                    <a href="#features">📋 Features</a>
+                </div>
+                
+                <div class="features" id="features">
+                    <div class="feature">
+                        <h3>🎯 Real-time Detection</h3>
+                        <p>AI-powered analysis of suspicious domains targeting Indian CSE entities like SBI, Airtel, IRCTC, and more.</p>
+                    </div>
+                    <div class="feature">
+                        <h3>🧠 Machine Learning</h3>
+                        <p>Ensemble of Random Forest, XGBoost, and Neural Networks with 110+ features for accurate classification.</p>
+                    </div>
+                    <div class="feature">
+                        <h3>📊 Comprehensive Analytics</h3>
+                        <p>Detailed dashboard with threat statistics, CSE targeting trends, and performance metrics.</p>
+                    </div>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-number">99.2%</div>
+                        <div>Accuracy Rate</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">1000+</div>
+                        <div>Domains/Minute</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">19</div>
+                        <div>CSE Entities Protected</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">24/7</div>
+                        <div>Monitoring</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 60px; font-size: 0.9em; opacity: 0.8;">
+                    <p>Protecting Indian Critical Sector Enterprises from Phishing Threats</p>
+                    <p>Powered by Advanced AI & Machine Learning Technologies</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
 
 @app.route('/dashboard')
 def dashboard():

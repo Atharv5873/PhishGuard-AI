@@ -60,10 +60,8 @@ class PhishGuardMongoDB:
         try:
             # Configure SSL/TLS settings for Docker compatibility
             ssl_options = {
-                'tlsCAFile': None,
                 'tlsAllowInvalidCertificates': True,
-                'tlsAllowInvalidHostnames': True,
-                'tlsInsecure': True
+                'tlsAllowInvalidHostnames': True
             }
             
             # Add SSL parameters to connection string if not present
