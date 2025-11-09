@@ -58,18 +58,8 @@ class PhishGuardMongoDB:
     def connect(self, database_name: str = None):
         """Connect to MongoDB database."""
         try:
-            # Configure SSL/TLS settings for Docker compatibility
-            ssl_options = {
-                'tlsAllowInvalidCertificates': True,
-                'tlsAllowInvalidHostnames': True
-            }
-            
-            # Add SSL parameters to connection string if not present
-            if 'mongodb+srv://' in self.connection_string and 'tls=' not in self.connection_string:
-                separator = '&' if '?' in self.connection_string else '?'
-                self.connection_string += f'{separator}tls=true&tlsAllowInvalidCertificates=true'
-            
-            self.client = MongoClient(self.connection_string, **ssl_options)
+            # Simple connection without SSL complications for Docker
+            self.client = MongoClient(self.connection_string)
             db_name = database_name or self.database_name
             self.db = self.client[db_name]
             
