@@ -29,7 +29,11 @@ import random
 from typing import Dict, List
 from pathlib import Path
 
-app = Flask(__name__)
+# Configure Flask app with correct template folder
+template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
+static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
+
+app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 
 # Global instances
 mongo_db = None
@@ -367,45 +371,45 @@ def detect_phishing():
 
 @app.route('/health')
 def health_check():
-    """Health check endpoint for Docker and load balancers."""
+    """Health check endpoint for monitoring."""
     try:
-        # Basic health checks
-        health_status = {
-            'status': 'healthy',
-            'timestamp': datetime.utcnow().isoformat() + 'Z',
-            'version': '1.0.0',
-            'components': {}
-        }
-        
-        # Check MongoDB connection
-        if mongo_db:
-            try:
-                # Simple ping test
-                mongo_db.client.admin.command('ping')
-                health_status['components']['mongodb'] = 'healthy'
-            except:
-                health_status['components']['mongodb'] = 'unhealthy'
-                health_status['status'] = 'degraded'
+        # Check if MongoDB connection is working
+        if mongo_db and mongo_db.db:
+            # Try to ping the database
+            mongo_db.db.admin.command('ping')
+            db_status = "connected"
         else:
-            health_status['components']['mongodb'] = 'not_configured'
+            db_status = "disconnected"
         
-        # Check detector availability
-        if detector:
-            health_status['components']['ml_detector'] = 'healthy'
-        else:
-            health_status['components']['ml_detector'] = 'unhealthy'
-            health_status['status'] = 'degraded'
-        
-        # Return appropriate status code
-        status_code = 200 if health_status['status'] == 'healthy' else 503
-        return jsonify(health_status), status_code
-        
+        return jsonify({
+            "status": "healthy",
+            "timestamp": datetime.now().isoformat(),
+            "database": db_status,
+            "version": "2.1.0"
+        }), 200
     except Exception as e:
         return jsonify({
-            'status': 'unhealthy',
-            'error': str(e),
-            'timestamp': datetime.utcnow().isoformat() + 'Z'
-        }), 500
+            "status": "unhealthy",
+            "timestamp": datetime.now().isoformat(),
+            "error": str(e)
+        }), 503
+
+@app.route('/debug/templates')
+def debug_templates():
+    """Debug endpoint to check template availability."""
+    import os
+    template_folder = app.template_folder
+    templates_found = []
+    
+    if os.path.exists(template_folder):
+        templates_found = os.listdir(template_folder)
+    
+    return jsonify({
+        "template_folder": template_folder,
+        "templates_found": templates_found,
+        "current_dir": os.getcwd(),
+        "dashboard_dir": os.path.dirname(os.path.abspath(__file__))
+    })
 
 if __name__ == '__main__':
     print("🚀 Initializing PhishGuard AI Simple Dashboard...")
