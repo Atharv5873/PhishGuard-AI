@@ -58,25 +58,40 @@ class PhishGuardMongoDB:
     def connect(self, database_name: str = None):
         """Connect to MongoDB database."""
         try:
-            self.client = MongoClient(self.connection_string)
+            # Configure SSL/TLS settings for Docker compatibility
+            ssl_options = {
+                'tlsCAFile': None,
+                'tlsAllowInvalidCertificates': True,
+                'tlsAllowInvalidHostnames': True,
+                'tlsInsecure': True
+            }
+            
+            # Add SSL parameters to connection string if not present
+            if 'mongodb+srv://' in self.connection_string and 'tls=' not in self.connection_string:
+                separator = '&' if '?' in self.connection_string else '?'
+                self.connection_string += f'{separator}tls=true&tlsAllowInvalidCertificates=true'
+            
+            self.client = MongoClient(self.connection_string, **ssl_options)
             db_name = database_name or self.database_name
             self.db = self.client[db_name]
             
-            # Test connection
+            # Test connection with timeout
             self.client.admin.command('ping')
             
             # Log connection details (without password)
             if "mongodb+srv://" in self.connection_string:
                 # Atlas connection
-                masked_uri = self.connection_string.split('@')[1] if '@' in self.connection_string else "Atlas"
+                masked_uri = self.connection_string.split('@')[1].split('?')[0] if '@' in self.connection_string else "Atlas"
                 self.logger.info(f"✅ Connected to MongoDB Atlas: {db_name} @ {masked_uri}")
             else:
                 # Local connection
-                self.logger.info(f"✅ Connected to Local MongoDB: {db_name} @ {self.connection_string}")
+                self.logger.info(f"✅ Connected to Local MongoDB: {db_name}")
             
         except Exception as e:
             self.logger.error(f"❌ MongoDB connection failed: {e}")
-            raise
+            # Don't raise exception to allow app to start without DB
+            self.client = None
+            self.db = None
     
     def setup_indexes(self):
         """Create optimized indexes for fast queries."""

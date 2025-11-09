@@ -43,17 +43,28 @@ def initialize_components():
     """Initialize MongoDB and detector components."""
     global mongo_db, detector
     try:
-        mongo_db = PhishGuardMongoDB()
-        # Initialize the enhanced detector with proper subdomain and URL handling
-        detector = EnhancedFixedDetector(use_mongodb=True)
+        # Try to initialize MongoDB
+        try:
+            mongo_db = PhishGuardMongoDB()
+            print("✅ MongoDB connected successfully")
+        except Exception as mongo_error:
+            print(f"⚠️  MongoDB connection failed: {mongo_error}")
+            print("📋 App will continue without database features")
+            mongo_db = None
+        
+        # Initialize the enhanced detector (works without MongoDB)
+        detector = EnhancedFixedDetector(use_mongodb=(mongo_db is not None))
         print("✅ Dashboard components initialized successfully")
     except Exception as e:
         print(f"❌ Failed to initialize components: {e}")
+        # Set defaults to allow app to start
+        mongo_db = None
+        detector = None
 
 @app.route('/')
 def landing():
-    """Redirect to dashboard since we don't have a landing template."""
-    return redirect('/dashboard')
+    """Product landing/marketing page as default."""
+    return render_template('landing.html')
 
 @app.route('/dashboard')
 def dashboard():
