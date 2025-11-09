@@ -1,9 +1,8 @@
 #!/bin/bash
 
-# Quick Fix for EC2 Docker Build and Import Issues
-# Run this on your EC2 instance to fix both numpy and import problems
-# UPDATED: Now includes tldextract, fuzzywuzzy, python-Levenshtein, validators dependencies
-# LATEST: Fixed MongoDB SSL handshake errors, landing page template, graceful fallbacks
+# Quick Fix for EC2 Docker Build and Import Issues  
+# LATEST: Restored original beautiful landing page + simplified MongoDB connection
+# FIXES: SSL handshake errors, numpy._core issues, landing page template restored
 
 echo "🔧 PhishGuard AI - Complete Docker Fix"
 echo "======================================"
