@@ -29,7 +29,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # Import our feature extractor
-from feature_engineering import PhishGuardFeatureExtractor
+from training.feature_engineering import PhishGuardFeatureExtractor
 
 class PhishGuardDetector:
     """

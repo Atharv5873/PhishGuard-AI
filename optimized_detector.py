@@ -32,7 +32,7 @@ warnings.filterwarnings('ignore')
 
 # Import existing components
 from production_detector import PhishGuardDetector
-from feature_engineering import PhishGuardFeatureExtractor
+from training.feature_engineering import PhishGuardFeatureExtractor
 
 class OptimizedPhishGuardDetector:
     """
